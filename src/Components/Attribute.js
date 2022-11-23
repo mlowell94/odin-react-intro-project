@@ -1,95 +1,75 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from "react";
+import { useWhatChanged } from '@simbathesailor/use-what-changed';
 
-export class Attribute extends Component {
-    constructor() {
-        super()
 
-        this.state = {
-            content: '',
-            current: '',
-            active: false,
-        }
+
+const Attribute = (props) => {
+    const [content, setContent] = useState(props.placeholder);
+    const [current, setCurrent] = useState('');
+    const [active, setActive] = useState(false);
+    const changeActive = () => {
+        setActive(active ? false : true)
     }
 
-    setActive() {
-        const newActiveState = this.getActive() ? false : true;
-        this.setState({
-            active: newActiveState
-        })
+    const changeCurrent = (value) => {
+        setCurrent(value)
     }
 
-    getActive() {
-        return this.state.active;
+    const changeContent = (value) => {
+        setContent(value)
     }
 
-    setContent(value) {
-        if (this.props.mode === 'simple') {
-            this.setState({
-                content: value
-            })
+    const handleChange = (value) => {
+        if (!(props.pattern.test(value))) {
+            setCurrent(null);
         } else {
-        this.setState({
-            content: value
-        }, () => { this.props.modifyEntry(this.props.attributeName, this.props.index, this.state.content, this.props.descIndex); })
+            setCurrent(value);
         }
     }
 
-    getContent() {
-        return this.state.content
+    const handleClick = () => {
+        setActive(active ? false : true)
+        changeCurrent(content)
     }
 
-    getCurrent() {
-        return this.state.current
-    }
-
-    setCurrent(value) {
-        this.setState({
-            current: value
-        })
-    }
-
-    handleChange(value) {
-        if (!(this.props.pattern.test(value))) {
-            this.setCurrent(null);
-        } else {
-            this.setCurrent(value);
-        }
-    }
-
-    handleClick() {
-        this.setActive();
-        this.setCurrent(this.getContent());
-    }
-
-    handleKeyPress(value) {
+    const handleKeyPress = (value) => {
         if (value === 'Enter') {
-            if (this.getCurrent() !== null) {
-                this.setContent(this.state.current);
-                this.setActive();
-                this.props.errorHandler('')
+            if (current !== null) {
+                changeContent(current);
+                changeActive();
+                props.errorHandler('')
             }else {
-                this.props.errorHandler(this.props.errorText)
+                props.errorHandler(props.errorText)
             }
         }
     }
-  render() {
-    if (this.getActive()) {
+
+    let deps = [content]
+    useWhatChanged(deps)
+
+    useEffect(() => {
+        if (props.mode !== "simple") {
+            props.modifyEntry(props.attributeName, props.index, content, props.descIndex)
+        }
+    }, [content])
+
+
+    if (active) {
         return (
             <input 
-            className = {this.props.class} 
-            defaultValue= { this.state.content } 
-            onChange={(e) => this.handleChange(e.target.value)} 
-            onKeyPress={(e) => this.handleKeyPress(e.key)} 
-            pattern = {this.props.pattern}
+            className = {props.class} 
+            defaultValue= { '' } 
+            onChange={(e) => handleChange(e.target.value)} 
+            onKeyPress={(e) => handleKeyPress(e.key)} 
+            pattern = {props.pattern}
             />
         )
     }
     return (
-        <span className = {this.props.class} onClick={() => this.handleClick()}>
-            {this.state.content === '' ? this.props.placeholder : this.state.content}
+        <span className = {props.class} onClick={() => handleClick()}>
+            {content === '' ? props.placeholder : content}
         </span>
     )
-  }
 }
 
 export default Attribute;

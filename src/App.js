@@ -20,7 +20,7 @@ export class App extends Component {
   render() {
     return (
       <div>
-        <Basics errorHandler = { this.setErrorMessage } mode={'simple'}/>
+        <Basics errorHandler = { this.setErrorMessage } mode={ 'simple' } />
         <Container errorHandler = { this.setErrorMessage } type='EDUCATION'/>
         <Container errorHandler = { this.setErrorMessage } type='WORK EXPERIENCE'/>
         <Error errorText = { this.state.errorMessage }/>
